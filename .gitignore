@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .DS_Store
 models/
+data/matches.json
+data/gamestate_dataset.csv
+results/poisson_test_predictions.csv
+docs/replay_data.json

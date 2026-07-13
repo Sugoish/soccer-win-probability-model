@@ -33,6 +33,8 @@ A gradient-boosted classifier trained on game-state snapshots, with isotonic pro
 
 Calibration trades a couple points of raw accuracy for meaningfully better log-loss and Brier score — the probabilities themselves are more trustworthy, which matters more than the top-1 pick for a live win-probability readout. Both beat the always-predict-the-most-common-outcome baseline by a wide margin.
 
+![Calibration curve](results/calibration_curve.png)
+
 ### Poisson expected-score model (`src/train_poisson_score_model.py`)
 
 The standard approach in football analytics: fit each team's attack and defense strength via a Poisson GLM (`goals ~ team + opponent + home advantage`) on final scores from the training matches, giving a pre-match expected goal rate for any matchup. Live in-match predictions blend this prior with the team's own observed xG pace so far, with the blend shifting toward the live signal as the match progresses. Remaining goals are modeled as independent Poisson draws, giving both an expected final score and win/draw/loss probabilities via direct convolution — a second, methodologically different probability estimate to sanity-check against the classifier.
@@ -46,25 +48,29 @@ The model meaningfully beats the naive baseline on home goals; on away goals it'
 
 ## Live replay (`docs/index.html`)
 
-A self-contained, static HTML page (Chart.js, no backend) that replays both models' live predictions minute-by-minute through a real match — by default, the 2022 World Cup Final. Hosted for free on GitHub Pages (`docs/` on `main`), so it costs nothing to keep live and needs no server.
+A self-contained, static HTML page (Chart.js, no backend) that replays both models' live predictions minute-by-minute through a real match — by default, the 2022 World Cup Final. The per-minute prediction data is embedded directly in the page, so it needs no server or API calls. Hosted for free on GitHub Pages (`docs/` on `main`), so it costs nothing to keep live.
 
 ## Project structure
 
 ```text
 soccer-win-probability-model/
-├── data/
-│   ├── matches.json              # StatsBomb match metadata (64 WC2022 matches)
-│   └── gamestate_dataset.csv     # engineered game-state snapshots (output of build_features.py)
+├── data/                          # StatsBomb-derived inputs -- generated locally, not committed (see "Running it yourself")
+│   ├── matches.json                   # StatsBomb match metadata (64 WC2022 matches)
+│   └── gamestate_dataset.csv          # engineered game-state snapshots (output of build_features.py)
 ├── src/
-│   ├── build_features.py         # raw StatsBomb events -> gamestate_dataset.csv
-│   ├── train_result_model.py     # win/draw/loss classifier + calibration
-│   ├── train_poisson_score_model.py  # Poisson attack/defense + live expected score
-│   └── build_replay_data.py      # generates docs/replay_data.json for the live demo
-├── models/                       # trained model artifacts (.joblib) -- generated locally, not committed (regenerate via src/)
-├── results/                      # metrics + calibration plot
+│   ├── build_features.py          # raw StatsBomb events -> gamestate_dataset.csv
+│   ├── train_result_model.py      # win/draw/loss classifier + calibration
+│   ├── train_poisson_score_model.py   # Poisson attack/defense + live expected score
+│   └── build_replay_data.py       # generates docs/replay_data.json for the live demo
+├── models/                        # trained model artifacts (.joblib) -- generated locally, not committed
+├── results/
+│   ├── calibration_curve.png      # committed -- referenced in this README
+│   ├── result_model_metrics.json  # committed
+│   ├── poisson_model_metrics.json # committed
+│   └── poisson_test_predictions.csv   # generated locally, not committed
 └── docs/
-    ├── index.html                # live replay visualization (GitHub Pages)
-    └── replay_data.json          # per-minute predictions for the demo match
+    ├── index.html                 # live replay visualization (GitHub Pages) -- data embedded inline
+    └── replay_data.json           # generated locally, not committed (index.html doesn't need it at runtime)
 ```
 
 ## Running it yourself
@@ -72,9 +78,12 @@ soccer-win-probability-model/
 ```bash
 pip install -r requirements.txt
 
-# raw StatsBomb events aren't committed here (too large) -- fetch them first:
+# raw StatsBomb data isn't committed here (too large) -- fetch it first:
 git clone --filter=blob:none --sparse https://github.com/statsbomb/open-data.git /tmp/sb_open_data
-# then extract data/events/<match_id>.json for the WC2022 match_ids into /tmp/sb_events/
+cd /tmp/sb_open_data
+git sparse-checkout set data/matches/43/106 data/events
+# copy data/matches/43/106.json to data/matches.json in this repo,
+# and the WC2022 match_id event files into /tmp/sb_events/ (see build_features.py for exact paths)
 
 python src/build_features.py
 python src/train_result_model.py
