@@ -165,7 +165,7 @@ for _, row in test_df.iterrows():
     exp_final_home, exp_final_away, rem_h, rem_a = project_expected_score(row)
     exp_home_list.append(exp_final_home)
     exp_away_list.append(exp_final_away)
-    ph, pd_, pa = result_probabilities(row["home_score"], rov["away_score"], rem_h, rem_a)
+    ph, pd_, pa = result_probabilities(row["home_score"], row["away_score"], rem_h, rem_a)
     p_home_list.append(ph)
     p_draw_list.append(pd_)
     p_away_list.append(pa)
