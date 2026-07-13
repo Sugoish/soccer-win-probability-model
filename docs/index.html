@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Soccer Win Probability Replay &mdash; 2022 World Cup Final</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" onerror="this.onerror=null;document.write('\x3Cscript src=\x22https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js\x22\x3E\x3C/script\x3E')"></script>
 <style>
   :root {
     --bg: #0f1115;
@@ -2749,18 +2749,23 @@ function makeChart(ctx, homeData, drawData, awayData) {
 const clfCtx = document.getElementById("clfChart").getContext("2d");
 const poissonCtx = document.getElementById("poissonChart").getContext("2d");
 
-const clfChart = makeChart(
-  clfCtx,
-  frames.map(f => f.clf_p_home_win * 100),
-  frames.map(f => f.clf_p_draw * 100),
-  frames.map(f => f.clf_p_away_win * 100)
-);
-const poissonChart = makeChart(
-  poissonCtx,
-  frames.map(f => f.poisson_p_home_win * 100),
-  frames.map(f => f.poisson_p_draw * 100),
-  frames.map(f => f.poisson_p_away_win * 100)
-);
+let clfChart = null, poissonChart = null;
+try {
+  clfChart = makeChart(
+    clfCtx,
+    frames.map(f => f.clf_p_home_win * 100),
+    frames.map(f => f.clf_p_draw * 100),
+    frames.map(f => f.clf_p_away_win * 100)
+  );
+  poissonChart = makeChart(
+    poissonCtx,
+    frames.map(f => f.poisson_p_home_win * 100),
+    frames.map(f => f.poisson_p_draw * 100),
+    frames.map(f => f.poisson_p_away_win * 100)
+  );
+} catch (err) {
+  console.error("Chart.js failed to load; charts disabled, rest of the UI still works.", err);
+}
 
 const scrubber = document.getElementById("scrubber");
 scrubber.max = frames.length - 1;
@@ -2785,12 +2790,13 @@ function render(i) {
   document.getElementById("cards").textContent = cardBits.length ? cardBits.join("  ") : "None";
 
   [clfChart, poissonChart].forEach(chart => {
+    if (!chart) return;
     chart.data.datasets[3].data = [
       { x: labels[i], y: chart === clfChart ? f.clf_p_home_win * 100 : f.poisson_p_home_win * 100 },
     ];
   });
-  clfChart.update("none");
-  poissonChart.update("none");
+  if (clfChart) clfChart.update("none");
+  if (poissonChart) poissonChart.update("none");
 }
 
 render(0);
