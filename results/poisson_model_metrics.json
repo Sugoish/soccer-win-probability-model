@@ -1,0 +1,13 @@
+{
+  "n_matches_train": 51,
+  "n_matches_test": 13,
+  "expected_score_mae": {
+    "model_home_goals": 0.7685840679004227,
+    "model_away_goals": 0.6144064360134776,
+    "naive_freeze_current_score_home": 1.0047945205479452,
+    "naive_freeze_current_score_away": 0.5684931506849316
+  },
+  "poisson_result_probabilities": {
+    "log_loss": 1.0334406337783009
+  }
+}

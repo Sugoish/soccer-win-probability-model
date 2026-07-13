@@ -1,0 +1,25 @@
+{
+  "n_matches_train": 51,
+  "n_matches_test": 13,
+  "n_rows_train": 5095,
+  "n_rows_test": 1460,
+  "class_order": [
+    "AWAY_WIN",
+    "DRAW",
+    "HOME_WIN"
+  ],
+  "calibrated": {
+    "accuracy": 0.5636986301369863,
+    "log_loss": 1.0218068780659004,
+    "multiclass_brier": 0.5943140862833038
+  },
+  "raw_uncalibrated": {
+    "accuracy": 0.5876712328767123,
+    "log_loss": 1.235337830962239,
+    "multiclass_brier": 0.6249421839658774
+  },
+  "baseline_majority_class": {
+    "accuracy": 0.4691780821917808,
+    "majority_class": "HOME_WIN"
+  }
+}
